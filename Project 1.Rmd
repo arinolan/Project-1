@@ -1,0 +1,75 @@
+---
+title: "Project 1"
+output:
+  html_document: default
+  pdf_document: default
+date: "2022-09-25"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r import libraries and data from github}
+library(readr)
+library(stringr)
+
+Url <- 'https://raw.githubusercontent.com/arinolan/Project-1/main/tournamentinfo.txt'
+
+raw_data <- read_csv(file = Url, col_names = FALSE)
+
+head(raw_data)
+
+tail(raw_data)
+
+```
+
+
+```{r deconstruct the txt data file}
+m1 <- matrix(unlist(raw_data), byrow=TRUE)
+m2 <- m1[seq(5, length(m1), 3)]
+head(m2)
+
+m3 <- m1[seq(6, length(m1), 3)]
+head(m3)
+```
+
+
+```{r restructure data}
+ID <- as.numeric(str_extract(m2, '\\d+'))
+Name <- str_extract(m2, '[A-z].{1,32}') 
+Name <- str_trim(str_extract(Name, '.+\\s{2,}'))
+State <- str_extract(m3, '[A-Z]{2}') 
+TotalNumberofPoints <- as.numeric(str_extract(m2, '\\d+\\.\\d'))
+PreRating <- str_extract(m3, 'R:.{8,}-')
+PreRating <- as.numeric(str_extract(PreRating, '\\d{1,4}'))
+Rounds <- str_extract_all(m2, '[A-Z]\\s{2,}\\d+')
+Rounds <- str_extract_all(Rounds, '\\d+')
+
+```
+
+
+```{r calculate avg pre rating}
+avgPreRating <- c()
+
+for(i in c(1:length(Rounds))){
+  avgPreRating[i] <- round(mean(PreRating[as.numeric(Rounds[[i]])]), 0)
+}
+avgPreRating
+
+```
+
+```{r Construct DF}
+output <- data.frame(ID,Name,State,TotalNumberofPoints,PreRating,avgPreRating)
+
+head(output)
+
+```
+
+```{R export to csv}
+write_csv(output, 'tournament.csv', append = FALSE)
+```
+ 
+ 
+ 
+ 
